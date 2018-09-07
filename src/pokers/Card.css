@@ -1,0 +1,33 @@
+.card {
+    background-color: white;
+    border: 1px solid gray;
+    text-align: left;
+    font-size: 2em;
+    width: 200px;
+    height: 300px;
+    display: inline-block;
+    border-radius: 4px;
+}
+
+.card-number {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.card-color {
+    margin-left:5px;
+    margin-top: -8px;
+}
+
+.card-big-color {
+    text-align: center;
+    font-size: 5em;
+}
+
+.card-diamond, .card-heart {
+    color:red;
+}
+
+.card-spade, .card-clubs {
+    color:black;
+}
