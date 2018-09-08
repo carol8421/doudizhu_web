@@ -5,21 +5,41 @@
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
+  vertical-align: center;
 }
 
 .App-header {
   background-color: #222;
-  height: 150px;
-  padding: 20px;
+  height: 60px;
   color: white;
 }
 
 .App-title {
   font-size: 1.5em;
+  display: inline;
+  vertical-align: center;
 }
 
 .App-intro {
   font-size: large;
+}
+
+.Player {
+  width: 60px;
+  display: inline-block;
+}
+
+.Left-Player {
+  background-color: rgb(33, 99, 42);
+}
+
+.Right-Player {
+  background-color: orange;
+}
+
+
+.Embedded-Deal {
+  display: inline-block;
 }
 
 @keyframes App-logo-spin {

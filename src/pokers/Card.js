@@ -25,7 +25,10 @@ class Card extends Component {
         
         
         
-        return (<div className= {"card " + color_css} >
+        return (<div className= {"card " + color_css} 
+                     style = {this.props.cStyle} 
+                     onClick = { e => { if (this.props.onClick)this.props.onClick(e, this.props.index);}}
+                >
             <div className= {"card-number " + color_css}> {number}</div>
             <div className= {"card-color " + color_css}> {color}</div>
             <div className= {"card-big-color " + color_css}> {color}</div>

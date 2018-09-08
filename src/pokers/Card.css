@@ -3,10 +3,12 @@
     border: 1px solid gray;
     text-align: left;
     font-size: 2em;
-    width: 200px;
-    height: 300px;
+    width: 142px;
+    height: 220px;
     display: inline-block;
     border-radius: 4px;
+    vertical-align: top;
+    transition: margin-top 0.3s;
 }
 
 .card-number {
@@ -21,7 +23,7 @@
 
 .card-big-color {
     text-align: center;
-    font-size: 5em;
+    font-size: 3em;
 }
 
 .card-diamond, .card-heart {
