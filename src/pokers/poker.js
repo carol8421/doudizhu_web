@@ -12,3 +12,13 @@ export const MIN3_V = 17;
 export const MIN3_W = 18;
 
 export const MIN3_COLOR = ['♦', '♣', '♥', '♠'];
+
+
+export function min3hex_to_list(hexstr) {
+    var result = [];
+    for (var i = 0; i<hexstr.length; i=i+2) {
+        var aa = parseInt(hexstr.substring(i,i+2),16);
+        result.push(aa);
+    }
+    return result;
+}

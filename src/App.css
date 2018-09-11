@@ -13,7 +13,10 @@
   height: 60px;
   color: white;
 }
-
+.App-login-status {
+  text-align: right;
+  padding-right: 60px;
+}
 .App-title {
   font-size: 1.5em;
   display: inline;
