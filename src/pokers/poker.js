@@ -22,3 +22,11 @@ export function min3hex_to_list(hexstr) {
     }
     return result;
 }
+
+export function min3list_to_hex(clist) {
+    var result = '';
+    for (var i = 0; i<clist.length; i=i+1) {
+        result += clist[i].toString(16);
+    }
+    return result; 
+}

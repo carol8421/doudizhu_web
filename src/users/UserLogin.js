@@ -17,7 +17,6 @@ class UserLogin extends Component {
                 'uid':this.state.input_uid,
             }))
             .then( resp => {
-                console.log(resp);
                 if(resp.data.rcode == 0) {
                     this.props.onLoginSuccess(this.state.input_uid, resp.data.data);
                 }
