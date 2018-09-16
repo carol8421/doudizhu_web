@@ -9,7 +9,6 @@ class CardList extends Component {
     // chooseCards 选中的index的list
     // toggle 改变一个的回调函数
     onClickCard(ev, index) {
-        console.log('click',index);
         if (this.props.enableChoose && this.props.toggle) {
             this.props.toggle(index);
         }

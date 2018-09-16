@@ -19,8 +19,8 @@ class App extends Component {
       master:-1,
       back3 :[0x25, 0x2E,0x8D],//底牌，为空表示还没叫地主
       remains:[0,0,0],
-      cards : [0x43, 0x6C, 0x8B, 0x27, 0x2F],
-      chooseCards: [0,2],
+      cards : [0x43, 0x6C, 0x8B, 0x27, 0x2F],//我的牌
+      chooseCards: [0,2],//准备出的牌
       pre_deals:[[0x43, 0x6C,],[0x43, 0x6C,],[]] //已经出牌数，为空表示不出
     }
     this.cursor = 0
@@ -74,8 +74,8 @@ class App extends Component {
   }
 
   onPollingSuccess (data) {
-    console.log(data);
     data.forEach(msg => {
+      console.log(msg);
       this.cursor = msg.cursor;
       if (this.cursor == 1) {
         this.getMyCards()

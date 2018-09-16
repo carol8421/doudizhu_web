@@ -21,6 +21,16 @@ class Card extends Component {
             else if (colorIndex === 3){
                 color_css = 'card-spade';
             }
+        }
+        else if (nValue == poker.MIN3_V) {
+            number = '小';
+            color = '王';
+            color_css = 'card-spade';
+        }
+        else if (nValue == poker.MIN3_W) {
+            number = '大';
+            color = '王';
+            color_css = 'card-heart';
         }    
         
         

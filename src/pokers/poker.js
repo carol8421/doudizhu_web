@@ -8,8 +8,8 @@ for (var i = 3; i< 16; i++) {
 
 export const MIN3 = min3;
 
-export const MIN3_V = 17;
-export const MIN3_W = 18;
+export const MIN3_V = 16;
+export const MIN3_W = 17;
 
 export const MIN3_COLOR = ['♦', '♣', '♥', '♠'];
 
