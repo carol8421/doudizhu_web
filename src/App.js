@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PublicCards from './doudizhu/PublicCards'
 import CardList from './pokers/CardList';
+import CardPlayed from './pokers/CardPlayed';
 import UserLogin from './users/UserLogin';
 import OperatePanel, {Action} from './doudizhu/OperatePanel';
 import axios from 'axios';
@@ -15,21 +16,23 @@ class App extends Component {
     this.state = {
       uid:0,
       roomId:0,
-      current_index:-1, //改谁出牌了
-      master:-1,
-      back3 :[0x25, 0x2E,0x8D],//底牌，为空表示还没叫地主
-      remains:[0,0,0],
-      cards : [0x43, 0x6C, 0x8B, 0x27, 0x2F],//我的牌
+
+      stage:0,
+      cardsRemain:[],
+      myCards: [0x43, 0x6C, 0x8B, 0x27, 0x2F],
+      myIndex: 0,
+      master: -1,
+      bottomCards: [0x25, 0x2E,0x8D],
+      playingTrack: [],
+
       chooseCards: [0,2],//准备出的牌
-      pre_deals:[[0x43, 0x6C,],[0x43, 0x6C,],[]] //已经出牌数，为空表示不出
-    }
-    this.cursor = 0
-    this.my_index = -1
+    };
+    this.cursor = 0;
   }
 
   toggle(i) {
  
-    if (i < this.state.cards.length) {
+    if (i < this.state.myCards.length) {
       var chooseCards = this.state.chooseCards;
       var orig_i = this.state.chooseCards.indexOf(i);
       if (orig_i >= 0) {
@@ -77,19 +80,18 @@ class App extends Component {
     data.forEach(msg => {
       console.log(msg);
       this.cursor = msg.cursor;
-      if (this.cursor == 1) {
+      if (msg.eventType == 100) {
         this.getMyCards()
         //加入抢地主的阶段
       }
-      else if (this.cursor == 2){
+      else if (msg.eventType == 110){
         this.setState({
-          master:msg.master,
-          current_index:msg.current_index,
-          back3: poker.min3hex_to_list(msg.back3),
+          master:msg.eventContent.master,
+          bottomCards: poker.min3hex_to_list(msg.bottomCards),
         });
       }
       else {
-        this.handleDealCards(msg);
+        this.handleDealCards(msg.eventContent);
       }
     });
   }
@@ -111,12 +113,13 @@ class App extends Component {
 
   onGetMyCards(data) {
     console.log('get my status:', data);
-    var cds = poker.min3hex_to_list(data.cards);
-    this.my_index = data.my_index;
+    var cds = poker.min3hex_to_list(data.myCards);
     var newstate = {
-      'cards':cds,
-      'remains':data.remains,
-      'pre_deals':data.pre_deals ?data.pre_deals: []
+      'state': data.state,
+      'myCards':cds,
+      'myIndex':data.myIndex,
+      'cardsRemain':data.cardsRemain,
+      'playingTrack':data.playingTrack,
     };
 
     this.setState(newstate);
@@ -148,7 +151,7 @@ class App extends Component {
       }
       var clist = [];
       for(var i = 0; i< this.state.chooseCards.length; ++i) {
-        clist.push(this.state.cards[this.state.chooseCards[i]])
+        clist.push(this.state.myCards[this.state.chooseCards[i]])
       }
       var cards = poker.min3list_to_hex(clist);
       axios.post(DealCardUrl, qs.stringify({
@@ -167,82 +170,57 @@ class App extends Component {
     }
   }
 
+  getCurrentTurn() {
+    if (this.state.playingTrack.length) {
+      return (this.state.playingTrack[this.state.playingTrack.length - 1].player + 1) % 3;
+    }
+    else {
+      return this.state.master;
+    }
+  }
+
   canIOperate(){
-    if (this.cursor == 0){
+    if (this.state.stage == 0){
       return false;
     }
-    else if (this.cursor == 1) {
+    else if (this.state.stage == 1) {
       return true;
     }
     else {
-      return this.my_index == this.state.current_index;
-    }
-  }
-  getLeftDeals(){
-    if (this.cursor < 2) {
-      return [];
-    }
-    var pre_length = this.state.pre_deals.length;
-    if (pre_length == 0) {
-      return [];
-    }
-    var leftIndex = (this.my_index+2) %3;
-    if ( leftIndex ===  this.state.current_index) {
-      return [];
-    }
-    else if (this.state.current_index === this.my_index) {
-      //前面一个出牌
-      return this.state.pre_deals[pre_length -1];
-    }
-    else {
-      //前面两个
-        return pre_length == 2? this.state.pre_deals[0] : [];
+      return this.state.myIndex == this.getCurrentTurn();
     }
   }
 
-  getRightDeals(){
-    if (this.cursor < 2) {
-      return [];
+  getPlayerPlayed(index) {
+    if (this.state.stage < 2) {
+      return null;
     }
-    var pre_length = this.state.pre_deals.length;
+    var pre_length = this.state.playingTrack.length;
     if (pre_length == 0) {
-      return [];
+      return null;
     }
-    var rightIndex = (this.my_index+1) %3;
-    if ( rightIndex ===  this.state.current_index) {
-      return [];
+
+    for (var i = pre_length - 2; i < pre_length; i++) {
+      if (i>= 0) {
+        if (this.state.playingTrack[i].player === index) {
+          return this.state.playingTrack[i];
+        }
+      }
     }
-    else if (this.state.current_index === this.my_index) {
-      //前面一个出牌
-      return pre_length == 2? this.state.pre_deals[0] : [];
-    }
-    else {
-      //前面两个
-      return this.state.pre_deals[pre_length -1];  
-    }
+    return null;
   }
 
-  getMyDeals() {
-    if (this.cursor < 2) {
-      return [];
-    }
-    var pre_length = this.state.pre_deals.length;
-    if (pre_length == 0) {
-      return [];
-    }
-    var nextIndex = (this.my_index+1) %3;
-    if ( nextIndex ===  this.state.current_index) {
-      return this.state.pre_deals[pre_length -1];  
-    }
-    else if (this.state.current_index === this.my_index) {
-      //前面一个出牌
-      return [];
-    }
-    else {
-      //前面两个
-      return pre_length == 2? this.state.pre_deals[0] : [];
-    } 
-  } 
+  getLeftPlayed(){
+    var leftIndex = (this.state.myIndex+2) %3;
+    // 遍历playTrack，最后的两项
+    return this.getPlayerPlayed(leftIndex);
+  }
+
+  getRightPlayed(){
+    var rightIndex = (this.state.myIndex+1) %3;
+    return this.getPlayerPlayed(rightIndex);
+  }
+
   render() {
     return (
       <div className="App">
@@ -252,18 +230,16 @@ class App extends Component {
         </header>
         {this.state.uid?
         (<React.Fragment>
-          <PublicCards cards={this.state.back3}
+          <PublicCards cards={this.state.bottomCards}
                      hideCard = {false}
           />
           <div>
           <div className="Player Left-Player">🐷</div>
-            <CardList   cards={this.getLeftDeals()} 
-                       enableChoose = {false}
-                       exClass = "Embedded-Deal"
+            <CardPlayed  played={this.getLeftPlayed()}
                     />
             <span>|||||||</span>
-            <CardList   cards={this.getRightDeals()} 
-                       enableChoose = {false}
+            <CardPlayed   cards={this.getRightPlayed()} 
+                      
                        exClass = "Embedded-Deal"
                     />
           <div className="Player Right-Player">🐶</div>
@@ -271,11 +247,10 @@ class App extends Component {
         <div className="My-Out-Section">
           {this.canIOperate() ? 
           (<OperatePanel onOperateAction = {this.onOperateAction.bind(this)}/>):
-          (<CardList   cards={this.getMyDeals()} 
-                       enableChoose = {false}
+          (<CardPlayed   played={this.getPlayerPlayed(this.state.myIndex)}
                     />) }
         </div>
-        <CardList   cards={this.state.cards} 
+        <CardList   cards={this.state.myCards} 
                     enableChoose = {true}
                     toggle={this.toggle.bind(this)}
                     chooseCards = {this.state.chooseCards}
