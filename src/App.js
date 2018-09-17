@@ -87,7 +87,7 @@ class App extends Component {
       else if (msg.eventType == 110){
         this.setState({
           master:msg.eventContent.master,
-          bottomCards: poker.min3hex_to_list(msg.bottomCards),
+          bottomCards: poker.min3hex_to_list(msg.eventContent.bottomCards),
         });
       }
       else {
@@ -115,7 +115,7 @@ class App extends Component {
     console.log('get my status:', data);
     var cds = poker.min3hex_to_list(data.myCards);
     var newstate = {
-      'state': data.state,
+      'stage': data.stage,
       'myCards':cds,
       'myIndex':data.myIndex,
       'cardsRemain':data.cardsRemain,
@@ -126,7 +126,15 @@ class App extends Component {
   }
 
   handleDealCards(msg) {
-
+    var track = this.state.playingTrack;
+    if (track.length == 2) {
+      track.splice(0,1);
+    }
+    track.push(msg);
+    this.setState({
+      playingTrack:track,
+    });
+    console.log(this.state);
   }
 
   onOperateAction(actor) {
