@@ -4,6 +4,8 @@ import CardList from './pokers/CardList';
 import CardPlayed from './pokers/CardPlayed';
 import UserLogin from './users/UserLogin';
 import OperatePanel, {Action} from './doudizhu/OperatePanel';
+import MiddleView from './layout/MiddleView';
+import Snackbar from '@material-ui/core/Snackbar';
 import axios from 'axios';
 import qs from 'qs';
 import * as poker from './pokers/poker';
@@ -19,13 +21,13 @@ class App extends Component {
 
       stage:0,
       cardsRemain:[],
-      myCards: [0x43, 0x6C, 0x8B, 0x27, 0x2F],
+      myCards: [],
       myIndex: 0,
       master: -1,
-      bottomCards: [0x25, 0x2E,0x8D],
+      bottomCards: [],
       playingTrack: [],
 
-      chooseCards: [0,2],//准备出的牌
+      chooseCards: [],//准备出的牌
     };
     this.cursor = 0;
   }
@@ -55,7 +57,7 @@ class App extends Component {
       'uid':uid,
       'roomId':data.roomId,
     });
-    this.startPolling();
+    this.poll_event_getMyCards();
   }
 
   startPolling(){
@@ -68,11 +70,11 @@ class App extends Component {
         if(resp.data.rcode === 0) {
             this.onPollingSuccess(resp.data.data);
         }
-        setTimeout(this.startPolling.bind(this), 11000);
+        setTimeout(this.startPolling.bind(this), 1);
     })
     .catch ( error => {
         console.error(error);
-        setTimeout(this.startPolling.bind(this), 11000);
+        setTimeout(this.startPolling.bind(this), 1);
     });
   }
 
@@ -81,22 +83,19 @@ class App extends Component {
       console.log(msg);
       this.cursor = msg.cursor;
       if (msg.eventType == 100) {
-        this.getMyCards()
+        this.poll_event_getMyCards()
         //加入抢地主的阶段
       }
       else if (msg.eventType == 110){
-        this.setState({
-          master:msg.eventContent.master,
-          bottomCards: poker.min3hex_to_list(msg.eventContent.bottomCards),
-        });
+        this.poll_event_masterDecided(msg.eventContent);
       }
       else {
-        this.handleDealCards(msg.eventContent);
+        this.poll_event_playCards(msg.eventContent);
       }
     });
   }
 
-  getMyCards() {
+  poll_event_getMyCards() {
     axios.post(GetMyCardsUrl, qs.stringify({
       'uid':this.state.uid,
       'roomId':this.state.roomId,
@@ -113,21 +112,51 @@ class App extends Component {
 
   onGetMyCards(data) {
     console.log('get my status:', data);
-    var cds = poker.min3hex_to_list(data.myCards);
-    var newstate = {
-      'stage': data.stage,
-      'myCards':cds,
-      'myIndex':data.myIndex,
-      'cardsRemain':data.cardsRemain,
-      'playingTrack':data.playingTrack,
-    };
-
+    var newstate = {stage:0};
+    if (data.stage) {
+      var cds = poker.min3hex_to_list(data.myCards);
+      newstate = {
+        'stage': data.stage,
+        'myCards':cds,
+        'myIndex':data.myIndex,
+        'cardsRemain':data.cardsRemain,
+      };
+      if (data.stage === 2) {
+        newstate['master'] = data.master;
+        newstate['bottomCards'] = poker.min3hex_to_order_list(data.bottomCards);
+        newstate['playingTrack'] = data.playingTrack;
+      }
+    }
     this.setState(newstate);
+
+    if (!this.cursor) {
+      this.cursor = data.cursor;
+      this.startPolling();
+    }
   }
 
-  handleDealCards(msg) {
+  poll_event_masterDecided(eventContent) {
+        //地主确定事件
+        var btmList = poker.min3hex_to_order_list(eventContent.bottomCards);
+        if (this.state.myIndex === eventContent.master) {
+          var newMyCards = this.state.myCards.concat(btmList);
+          this.setState({
+            master:eventContent.master,
+            bottomCards:btmList,
+            myCards: newMyCards.sort(poker.min3_compare_nocolor),
+          });
+        }
+        else {
+          this.setState({
+            master:eventContent.master,
+            bottomCards:btmList,
+          });
+        }
+  }
+
+  poll_event_playCards(msg) {
     var track = this.state.playingTrack;
-    if (track.length == 2) {
+    if (track.length === 2) {
       track.splice(0,1);
     }
     track.push(msg);
@@ -153,29 +182,59 @@ class App extends Component {
       });
     }
     else if (actor === Action.deal) {
-      if (this.state.chooseCards.length == 0) {
-        console.log("please choose card");
-        return;
-      }
-      var clist = [];
-      for(var i = 0; i< this.state.chooseCards.length; ++i) {
-        clist.push(this.state.myCards[this.state.chooseCards[i]])
-      }
-      var cards = poker.min3list_to_hex(clist);
-      axios.post(DealCardUrl, qs.stringify({
-        'uid':this.state.uid,
-        'roomId':this.state.roomId,
-        'cards':cards,
-      }))
-      .then( resp => {
-          if(resp.data.rcode === 0) {
-              console.log('value deal card');
-          }
-      })
-      .catch ( error => {
-          console.error('ask for master',error);
-      }); 
+      this.playCard();
     }
+    else if (actor === Action.pass) {
+      this.passCard();
+    }
+  }
+
+  playCard() {
+    if (this.state.chooseCards.length == 0) {
+      console.log("please choose card");
+      return;
+    }
+    var clist = [];
+    for(var i = 0; i< this.state.chooseCards.length; ++i) {
+      clist.push(this.state.myCards[this.state.chooseCards[i]])
+    }
+    var cards = poker.min3list_to_hex(clist);
+    axios.post(DealCardUrl, qs.stringify({
+      'uid':this.state.uid,
+      'roomId':this.state.roomId,
+      'cards':cards,
+    }))
+    .then( resp => {
+        if(resp.data.rcode === 0) {
+            console.log('value deal card');
+            this.setState({
+              chooseCards :[],
+              myCards:this.state.myCards.filter((c) => !clist.includes(c)),
+            });
+        }
+        else if (resp.data.rcode === 121) {
+          this.showSnackbar('无效出牌');
+        }
+    })
+    .catch ( error => {
+        console.error('play card',error);
+    }); 
+  }
+
+  passCard() {
+    axios.post(DealCardUrl, qs.stringify({
+      'uid':this.state.uid,
+      'roomId':this.state.roomId,
+      'cards':'',
+    }))
+    .then( resp => {
+        if(resp.data.rcode === 0) {
+            console.log('value pass card');
+        }
+    })
+    .catch ( error => {
+        console.error('pass card',error);
+    });  
   }
 
   getCurrentTurn() {
@@ -187,6 +246,12 @@ class App extends Component {
     }
   }
 
+  showSnackbar(msg) {
+    this.setState({
+      showSnackbar:true,
+      snackbarMessage:msg,
+    });
+  }
   canIOperate(){
     if (this.state.stage == 0){
       return false;
@@ -197,36 +262,6 @@ class App extends Component {
     else {
       return this.state.myIndex == this.getCurrentTurn();
     }
-  }
-
-  getPlayerPlayed(index) {
-    if (this.state.stage < 2) {
-      return null;
-    }
-    var pre_length = this.state.playingTrack.length;
-    if (pre_length == 0) {
-      return null;
-    }
-
-    for (var i = pre_length - 2; i < pre_length; i++) {
-      if (i>= 0) {
-        if (this.state.playingTrack[i].player === index) {
-          return this.state.playingTrack[i];
-        }
-      }
-    }
-    return null;
-  }
-
-  getLeftPlayed(){
-    var leftIndex = (this.state.myIndex+2) %3;
-    // 遍历playTrack，最后的两项
-    return this.getPlayerPlayed(leftIndex);
-  }
-
-  getRightPlayed(){
-    var rightIndex = (this.state.myIndex+1) %3;
-    return this.getPlayerPlayed(rightIndex);
   }
 
   render() {
@@ -241,23 +276,11 @@ class App extends Component {
           <PublicCards cards={this.state.bottomCards}
                      hideCard = {false}
           />
-          <div>
-          <div className="Player Left-Player">🐷</div>
-            <CardPlayed  played={this.getLeftPlayed()}
-                    />
-            <span>|||||||</span>
-            <CardPlayed   cards={this.getRightPlayed()} 
-                      
-                       exClass = "Embedded-Deal"
-                    />
-          <div className="Player Right-Player">🐶</div>
-        </div>
-        <div className="My-Out-Section">
-          {this.canIOperate() ? 
-          (<OperatePanel onOperateAction = {this.onOperateAction.bind(this)}/>):
-          (<CardPlayed   played={this.getPlayerPlayed(this.state.myIndex)}
-                    />) }
-        </div>
+          <MiddleView gameState={this.state}/>
+          <div className="My-Out-Section">
+            <CardPlayed   gameState={this.state} player="myself" />
+            <OperatePanel onOperateAction = {this.onOperateAction.bind(this)} show = {this.canIOperate()}/>
+          </div>
         <CardList   cards={this.state.myCards} 
                     enableChoose = {true}
                     toggle={this.toggle.bind(this)}
@@ -265,7 +288,16 @@ class App extends Component {
         />
         </React.Fragment>) : ( <UserLogin onLoginSuccess={this.onLoginSuccess.bind(this)} />)}
         
-
+        <Snackbar
+          anchorOrigin={{
+            vertical:'bottom',
+            horizontal:'center',
+          }}
+          open = {this.state.showSnackbar}
+          autoHideDuration = {4000}
+          message = {this.state.snackbarMessage}
+          onClose ={(r) => this.setState({showSnackbar:false})}
+          />
       </div>
     );
   }

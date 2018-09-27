@@ -30,3 +30,22 @@ export function min3list_to_hex(clist) {
     }
     return result; 
 }
+
+export function min3_compare_nocolor(a, b) {
+    if (a === b) {
+        return 0;
+    }
+    var aKey = ((a & 0x1F) << 3) + (a >> 5);
+    var bKey = ((b & 0x1F) << 3) + (b >> 5);
+    if ( aKey > bKey) {
+        return -1;
+    }
+    else {
+        return 1;
+    }
+}
+
+export function min3hex_to_order_list(hexstr) {
+    var ll = min3hex_to_list(hexstr);
+    return ll.sort(min3_compare_nocolor);
+}

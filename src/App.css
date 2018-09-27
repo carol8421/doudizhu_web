@@ -27,22 +27,8 @@
   font-size: large;
 }
 
-.Player {
-  width: 60px;
-  display: inline-block;
-}
-
-.Left-Player {
-  background-color: rgb(33, 99, 42);
-}
-
-.Right-Player {
-  background-color: orange;
-}
-
-
-.Embedded-Deal {
-  display: inline-block;
+.CardPlayed {
+  height:220px;
 }
 
 @keyframes App-logo-spin {

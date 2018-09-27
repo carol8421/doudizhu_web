@@ -1,0 +1,31 @@
+.Middle-container {
+    display: flex;
+}
+
+.Middle-half {
+    flex:1;
+    display: flex;
+}
+
+.half-left {
+    justify-content: flex-start;
+}
+
+.half-right {
+    justify-content: flex-end;
+}
+
+
+
+.Player {
+    width: 100px;
+  }
+  
+  .Left-Player {
+    background-color: rgb(33, 99, 42);
+  }
+  
+  .Right-Player {
+    background-color: orange;
+  }
+  
