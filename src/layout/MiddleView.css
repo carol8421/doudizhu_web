@@ -5,6 +5,7 @@
 .Middle-half {
     flex:1;
     display: flex;
+    align-items: flex-end;
 }
 
 .half-left {
@@ -16,16 +17,5 @@
 }
 
 
-
-.Player {
-    width: 100px;
-  }
   
-  .Left-Player {
-    background-color: rgb(33, 99, 42);
-  }
-  
-  .Right-Player {
-    background-color: orange;
-  }
   

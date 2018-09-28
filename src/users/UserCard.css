@@ -1,0 +1,17 @@
+
+
+.Player {
+    width: 100px;
+    height: 140px;
+}
+.player-pig {
+    background-color:pink;
+}
+
+.player-dog {
+    background-color: lightblue;
+}
+
+.player-none {
+    background-color: lightgreen;
+}

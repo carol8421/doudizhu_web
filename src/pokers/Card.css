@@ -3,17 +3,24 @@
     border: 1px solid gray;
     text-align: left;
     font-size: 2em;
-    width: 142px;
-    height: 220px;
+    width: 140px;
+    height: 210px;
     display: inline-block;
     border-radius: 4px;
     vertical-align: top;
     transition: margin-top 0.3s;
 }
 
+.card-small {
+    width: 80px;
+    height: 100px;
+}
+
 .card-number {
     margin-top: 5px;
-    margin-left: 5px;
+    margin-left: 4px;
+    width:32px;
+    text-align: center;
 }
 
 .card-color {
@@ -22,7 +29,7 @@
 }
 
 .card-big-color {
-    text-align: center;
+    text-align: right;
     font-size: 3em;
 }
 

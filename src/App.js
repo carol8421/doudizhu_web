@@ -5,6 +5,7 @@ import CardPlayed from './pokers/CardPlayed';
 import UserLogin from './users/UserLogin';
 import OperatePanel, {Action} from './doudizhu/OperatePanel';
 import MiddleView from './layout/MiddleView';
+import UserCard from './users/UserCard';
 import Snackbar from '@material-ui/core/Snackbar';
 import axios from 'axios';
 import qs from 'qs';
@@ -141,6 +142,7 @@ class App extends Component {
         if (this.state.myIndex === eventContent.master) {
           var newMyCards = this.state.myCards.concat(btmList);
           this.setState({
+            stage:2,
             master:eventContent.master,
             bottomCards:btmList,
             myCards: newMyCards.sort(poker.min3_compare_nocolor),
@@ -148,6 +150,7 @@ class App extends Component {
         }
         else {
           this.setState({
+            stage:2,
             master:eventContent.master,
             bottomCards:btmList,
           });
@@ -281,11 +284,12 @@ class App extends Component {
             <CardPlayed   gameState={this.state} player="myself" />
             <OperatePanel onOperateAction = {this.onOperateAction.bind(this)} show = {this.canIOperate()}/>
           </div>
-        <CardList   cards={this.state.myCards} 
+          <CardList   cards={this.state.myCards} 
                     enableChoose = {true}
                     toggle={this.toggle.bind(this)}
                     chooseCards = {this.state.chooseCards}
-        />
+          />
+          <UserCard exClass="MyUserInfo" index = {this.state.myIndex} />
         </React.Fragment>) : ( <UserLogin onLoginSuccess={this.onLoginSuccess.bind(this)} />)}
         
         <Snackbar

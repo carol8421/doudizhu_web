@@ -9,16 +9,16 @@
 }
 
 .App-header {
-  background-color: #222;
+  position: absolute;
+  top:0px;
   height: 60px;
-  color: white;
 }
 .App-login-status {
   text-align: right;
   padding-right: 60px;
 }
 .App-title {
-  font-size: 1.5em;
+  font-size: 1em;
   display: inline;
   vertical-align: center;
 }
@@ -27,8 +27,10 @@
   font-size: large;
 }
 
-.CardPlayed {
-  height:220px;
+
+.MyUserInfo {
+  position: absolute;
+  bottom:0px;
 }
 
 @keyframes App-logo-spin {

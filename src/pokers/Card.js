@@ -5,7 +5,7 @@ import * as poker from './poker';
 //显示 console格式的牌 ['♦', '♣', '♥', '♠'] min3 类型
 class Card extends Component {
     render() {
-
+        var small = this.props.size === 'small';
         var nValue = this.props.cValue & 0x1F;
         if (nValue < poker.MIN3_V) {
             var number = poker.MIN3[nValue];
@@ -33,15 +33,20 @@ class Card extends Component {
             color_css = 'card-heart';
         }    
         
+        var small_cn = '';
+        if (small) {
+            small_cn += ' card-small';
+        }
         
-        
-        return (<div className= {"card " + color_css} 
+        return (<div className= {"card " + color_css + small_cn} 
                      style = {this.props.cStyle} 
                      onClick = { e => { if (this.props.onClick)this.props.onClick(e, this.props.index);}}
                 >
             <div className= {"card-number " + color_css}> {number}</div>
             <div className= {"card-color " + color_css}> {color}</div>
-            <div className= {"card-big-color " + color_css}> {color}</div>
+            { !small &&
+                (<div className= {"card-big-color " + color_css}> {color}</div>)
+            }
         </div>);
     }
 

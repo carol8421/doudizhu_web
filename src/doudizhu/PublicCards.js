@@ -7,9 +7,9 @@ class PublicCards extends Component {
     render() {
 
         return (<div className="PublicCards">
-            <Card cValue = {this.props.cards[0]} />
-            <Card cValue = {this.props.cards[1]} />
-            <Card cValue = {this.props.cards[2]} />
+            <Card cValue = {this.props.cards[0]} size='small'/>
+            <Card cValue = {this.props.cards[1]} size='small'/>
+            <Card cValue = {this.props.cards[2]} size='small'/>
         </div>)
     }
 

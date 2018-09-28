@@ -23,6 +23,7 @@ class UserLogin extends Component {
             })
             .catch ( error => {
                 console.error(error);
+                alert(error);
             });
         }
     }

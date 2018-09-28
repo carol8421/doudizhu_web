@@ -2,12 +2,16 @@ import React, {Component} from 'react';
 
 import CardList from './CardList';
 import * as poker from './poker';
+import './CardPlayed.css';
+
 class CardPlayed extends Component {
     constructor(props) {
         super(props);
         this.tempstate = {
             main:0,//0 显示空白， 1 倒计时， 2 不要， 3 显示牌内容
             cards:[],//牌内容
+        }
+        this.state = {
             second: 0, //秒数
         }
     }
@@ -77,10 +81,10 @@ class CardPlayed extends Component {
         console.log('card played for '+ this.props.player, this.tempstate);
         var didSomething = ''; 
         if (this.tempstate.main === 1) {
-            didSomething = '倒计时：' + this.tempstate.second;
+            didSomething = (<div className="Middle-Tips">倒计时:{this.state.second} </div>);
         }
         else if (this.tempstate.main === 2) {
-            didSomething = '不要';
+            didSomething = (<div className="Middle-Tips">不要</div>);
         }
         else if (this.tempstate.main === 3) {
             didSomething = (<CardList   cards={this.tempstate.cards} 
