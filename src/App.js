@@ -308,7 +308,7 @@ class App extends Component {
                      hideCard = {false}
           />
           <MiddleView gameState={this.state}/>
-          <div className="My-Out-Section" style={{height:'210px'}}>
+          <div className="My-Out-Section">
             <CardPlayed   gameState={this.state} player="myself" />
             <OperatePanel onOperateAction = {this.onOperateAction.bind(this)} 
                 stage = {this.state.stage}

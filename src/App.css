@@ -23,8 +23,8 @@
   vertical-align: center;
 }
 
-.App-intro {
-  font-size: large;
+.My-Out-Section {
+  height:210px;
 }
 
 
@@ -37,4 +37,10 @@
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@media screen and (max-height: 400px) {
+  .My-Out-Section {
+    height:88px;
+  }
 }

@@ -45,26 +45,32 @@
 
 @media screen and (max-height: 400px) {
     .card {
-        font-size:1em;
-        width:56px;
-        height:84px;
+        font-size:26px;
+        width:58px;
+        height:88px;
     }
     .card-small {
+        font-size:18px;
         width:32px;
         height:40px;
     }
     .card-number {
         margin-left:0px;
         margin-top:0px;
-        width:15px;
+        width:22px;
+    }
+    .card-small .card-number {
+        width:18px;
     }
     .card-color {
+        font-size:20px;
         margin-left:0px;
         margin-top: -4px;
     }
-
+    .card-small .card-color {
+        font-size:16px;
+    }
     .card-big-color {
-        margin-top:-10px;
-        font-size:2.5em;
+        display: none;
     }
 }

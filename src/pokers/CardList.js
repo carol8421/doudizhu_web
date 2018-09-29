@@ -16,15 +16,16 @@ class CardList extends Component {
     }
 
     render() {
-        var card_list = [];
+        var card_list = []
         // enable的情况
-        var mgLeft = "-100px";
+        var mobile = document.documentElement.clientHeight < 400;
+        var mgLeft = mobile? "-30px" : "-100px";
         var firstChoosed = {marginTop:"0px"};
-        var firstUnchoosed = {marginTop:"30px"};
+        var firstUnchoosed = {marginTop: mobile? "18px" :"30px"};
         var nChoosed = {marginLeft :mgLeft,
                         marginTop : "0px"};
         var nUnchoosed = {marginLeft :mgLeft,
-                          marginTop:"30px"};
+                          marginTop:mobile? "18px":"30px"};
         var cStyle;
 
         for (var i = 0; i < this.props.cards.length; i++) {
@@ -48,7 +49,7 @@ class CardList extends Component {
         }
 
 
-        return (<div className={"CardList " + this.props.exClass}>
+        return (<div className={["CardList",this.props.exClass].join(' ')}>
                 {card_list}
                 </div>)
     }

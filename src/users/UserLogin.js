@@ -33,13 +33,13 @@ class UserLogin extends Component {
         });
     }
     render() {
-        return ( <div>
+        return ( <div className="login-contianer">
             <label>uid:
             <input type="number" id="my_uid" 
                 value={this.state.input_uid} 
                 onChange={this.valueChanged.bind(this)}/>
                 </label>
-            <button onClick={this.login.bind(this)}>Login</button>
+            <button  className = "btn-login "onClick={this.login.bind(this)}>Login</button>
             </div>)
     }
 }
