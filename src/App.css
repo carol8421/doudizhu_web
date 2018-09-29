@@ -28,9 +28,10 @@
 }
 
 
-.MyUserInfo {
-  position: absolute;
-  bottom:0px;
+.My-Hand-Section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 @keyframes App-logo-spin {

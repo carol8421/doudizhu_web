@@ -59,7 +59,7 @@ class CardPlayed extends Component {
                         //显示不要或者牌
                         if (myOperate.pattern) {
                             this.tempstate.main = 3;
-                            this.tempstate.cards = poker.min3hex_to_list(myOperate.cards);
+                            this.tempstate.cards = poker.min3hex_to_order_list(myOperate.cards);
                         }
                         else {
                             this.tempstate.main = 2;

@@ -16,6 +16,7 @@
     height: 100px;
 }
 
+
 .card-number {
     margin-top: 5px;
     margin-left: 4px;
@@ -39,4 +40,31 @@
 
 .card-spade, .card-clubs {
     color:black;
+}
+
+
+@media screen and (max-height: 400px) {
+    .card {
+        font-size:1em;
+        width:56px;
+        height:84px;
+    }
+    .card-small {
+        width:32px;
+        height:40px;
+    }
+    .card-number {
+        margin-left:0px;
+        margin-top:0px;
+        width:15px;
+    }
+    .card-color {
+        margin-left:0px;
+        margin-top: -4px;
+    }
+
+    .card-big-color {
+        margin-top:-10px;
+        font-size:2.5em;
+    }
 }

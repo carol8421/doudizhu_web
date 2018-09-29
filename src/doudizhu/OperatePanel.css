@@ -1,0 +1,13 @@
+.OperatePanel {
+    transform: translateY(-100%);
+}
+
+.Button-Flex {
+    display: flex;
+    justify-content:center;
+}
+
+.Operate-Button {
+    margin-left: 25px !important;
+    margin-right: 25px !important;
+}

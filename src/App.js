@@ -12,6 +12,7 @@ import qs from 'qs';
 import * as poker from './pokers/poker';
 import {PollChangesUrl, GetMyCardsUrl,AskForMasterUrl, DealCardUrl} from './url';
 import './App.css';
+import HandStatus from './doudizhu/HandStatus';
 
 class App extends Component {
   constructor(props) {
@@ -90,8 +91,11 @@ class App extends Component {
       else if (msg.eventType == 110){
         this.poll_event_masterDecided(msg.eventContent);
       }
-      else {
+      else if (msg.eventType == 111){
         this.poll_event_playCards(msg.eventContent);
+      }
+      else if (msg.eventType === 112) {
+        this.poll_event_endInfo(msg.eventContent);
       }
     });
   }
@@ -141,10 +145,13 @@ class App extends Component {
         var btmList = poker.min3hex_to_order_list(eventContent.bottomCards);
         if (this.state.myIndex === eventContent.master) {
           var newMyCards = this.state.myCards.concat(btmList);
+          var newRemains = this.state.cardsRemain;
+          newRemains[this.state.myIndex] += 3;
           this.setState({
             stage:2,
             master:eventContent.master,
             bottomCards:btmList,
+            cardsRemain: newRemains,
             myCards: newMyCards.sort(poker.min3_compare_nocolor),
           });
         }
@@ -163,10 +170,31 @@ class App extends Component {
       track.splice(0,1);
     }
     track.push(msg);
+    var newRemains = this.state.cardsRemain;
+    if (msg.pattern) {
+      newRemains[msg.player] = newRemains[msg.player] - (msg.cards.length/2);
+    }
+
     this.setState({
       playingTrack:track,
+      cardsRemain:newRemains,
     });
     console.log(this.state);
+  }
+
+  poll_event_endInfo(msgContent) {
+    this.setState({
+      stage:3,
+      unplayedCards:msgContent.unplayedCards,
+    });
+    var win_index = 0;
+    msgContent.unplayedCards.forEach( function cb(ele,index,arr) {
+      if(!ele) {
+        win_index = index;
+      }
+    });
+
+    alert(win_index === this.state.myIndex ? "你赢了！" : "你输了！");
   }
 
   onOperateAction(actor) {
@@ -256,10 +284,10 @@ class App extends Component {
     });
   }
   canIOperate(){
-    if (this.state.stage == 0){
+    if (this.state.stage === 0 || this.state.stage === 3){
       return false;
     }
-    else if (this.state.stage == 1) {
+    else if (this.state.stage === 1) {
       return true;
     }
     else {
@@ -280,21 +308,28 @@ class App extends Component {
                      hideCard = {false}
           />
           <MiddleView gameState={this.state}/>
-          <div className="My-Out-Section">
+          <div className="My-Out-Section" style={{height:'210px'}}>
             <CardPlayed   gameState={this.state} player="myself" />
-            <OperatePanel onOperateAction = {this.onOperateAction.bind(this)} show = {this.canIOperate()}/>
+            <OperatePanel onOperateAction = {this.onOperateAction.bind(this)} 
+                stage = {this.state.stage}
+                show = {this.canIOperate()}/>
           </div>
-          <CardList   cards={this.state.myCards} 
+          <div className="My-Hand-Section">
+            <UserCard index = {this.state.myIndex} />
+
+            <CardList   cards={this.state.myCards} 
                     enableChoose = {true}
                     toggle={this.toggle.bind(this)}
                     chooseCards = {this.state.chooseCards}
-          />
-          <UserCard exClass="MyUserInfo" index = {this.state.myIndex} />
+            />
+            <HandStatus remain={this.state.cardsRemain[this.state.myIndex]} 
+                    isMaster={this.state.master === this.state.myIndex} />
+          </div>
         </React.Fragment>) : ( <UserLogin onLoginSuccess={this.onLoginSuccess.bind(this)} />)}
         
         <Snackbar
           anchorOrigin={{
-            vertical:'bottom',
+            vertical:'top',
             horizontal:'center',
           }}
           open = {this.state.showSnackbar}

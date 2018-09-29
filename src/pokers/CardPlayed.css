@@ -1,6 +1,11 @@
+.CardPlayed {
+    height:210px;
+}
 
 .Middle-Tips {
     font-size: 2em;
     color:indigo;
-    margin-bottom:50px;
+    position: relative;
+    top:50%;
+    transform: translateY(-50%);
 }
