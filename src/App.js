@@ -10,9 +10,12 @@ import Snackbar from '@material-ui/core/Snackbar';
 import axios from 'axios';
 import qs from 'qs';
 import * as poker from './pokers/poker';
-import {PollChangesUrl, GetMyCardsUrl,AskForMasterUrl, DealCardUrl} from './url';
+import {PollChangesUrl, GetMyCardsUrl,
+  AskForMasterUrl, DealCardUrl, RestartGameUrl,
+  LeaveRoomUrl} from './url';
 import './App.css';
 import HandStatus from './doudizhu/HandStatus';
+import OverDialog from './doudizhu/OverDialog';
 
 class App extends Component {
   constructor(props) {
@@ -30,6 +33,7 @@ class App extends Component {
       playingTrack: [],
 
       chooseCards: [],//准备出的牌
+      showOverDialog:false,
     };
     this.cursor = 0;
   }
@@ -71,12 +75,13 @@ class App extends Component {
     .then( resp => {
         if(resp.data.rcode === 0) {
             this.onPollingSuccess(resp.data.data);
+            setTimeout(this.startPolling.bind(this), 1);
         }
-        setTimeout(this.startPolling.bind(this), 1);
+        
     })
     .catch ( error => {
         console.error(error);
-        setTimeout(this.startPolling.bind(this), 1);
+        setTimeout(this.startPolling.bind(this), 2000);
     });
   }
 
@@ -186,41 +191,41 @@ class App extends Component {
     this.setState({
       stage:3,
       unplayedCards:msgContent.unplayedCards,
-    });
-    var win_index = 0;
-    msgContent.unplayedCards.forEach( function cb(ele,index,arr) {
-      if(!ele) {
-        win_index = index;
-      }
+      showOverDialog: true,
     });
 
-    alert(win_index === this.state.myIndex ? "你赢了！" : "你输了！");
+    setTimeout(this.request_restartGame.bind(this), 5000);
   }
 
   onOperateAction(actor) {
     if(actor === Action.askMaster) {
-      axios.post(AskForMasterUrl, qs.stringify({
-        'uid':this.state.uid,
-        'roomId':this.state.roomId,
-      }))
-      .then( resp => {
-          if(resp.data.rcode === 0) {
-              console.log('congulation, you get master');
-          }
-      })
-      .catch ( error => {
-          console.error('ask for master',error);
-      });
+      this.request_askMaster();
     }
     else if (actor === Action.deal) {
-      this.playCard();
+      this.request_playCard();
     }
     else if (actor === Action.pass) {
-      this.passCard();
+      this.request_passCard();
     }
   }
 
-  playCard() {
+  request_askMaster () {
+    axios.post(AskForMasterUrl, qs.stringify({
+      'uid':this.state.uid,
+      'roomId':this.state.roomId,
+    }))
+    .then( resp => {
+        if(resp.data.rcode === 0) {
+            console.log('congulation, you get master');
+        }
+    })
+    .catch ( error => {
+        console.error('ask for master',error);
+    });
+  }
+
+
+  request_playCard() {
     if (this.state.chooseCards.length == 0) {
       console.log("please choose card");
       return;
@@ -252,7 +257,7 @@ class App extends Component {
     }); 
   }
 
-  passCard() {
+  request_passCard() {
     axios.post(DealCardUrl, qs.stringify({
       'uid':this.state.uid,
       'roomId':this.state.roomId,
@@ -262,11 +267,36 @@ class App extends Component {
         if(resp.data.rcode === 0) {
             console.log('value pass card');
         }
+        else if (resp.data.rcode === 121) {
+          this.showSnackbar('无效出牌'); 
+        }
     })
     .catch ( error => {
         console.error('pass card',error);
     });  
   }
+
+  request_restartGame() {
+    this.setState({
+      showOverDialog:false,
+    })
+    axios.post(RestartGameUrl, qs.stringify({
+      'uid':this.state.uid,
+      'roomId':this.state.roomId,
+    }))
+    .then( resp => {
+        if(resp.data.rcode === 0) {
+            console.log('restart game success');
+        }
+        else if (resp.data.rcode === 122) {
+          this.showSnackbar('人数不足'); 
+        }
+    })
+    .catch ( error => {
+        console.error('pass card',error);
+    }); 
+  }
+
 
   getCurrentTurn() {
     if (this.state.playingTrack.length) {
@@ -300,7 +330,11 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">欢迎来到九九斗地主</h1>
-          <div className="App-login-status">uid:{this.state.uid}, roomId:{this.state.roomId}</div>
+          <div>
+
+            <div className="App-login-status">uid:{this.state.uid}, roomId:{this.state.roomId}</div>
+          </div>
+          
         </header>
         {this.state.uid?
         (<React.Fragment>
@@ -337,6 +371,7 @@ class App extends Component {
           message = {this.state.snackbarMessage}
           onClose ={(r) => this.setState({showSnackbar:false})}
           />
+        <OverDialog gameState = {this.state}/>
       </div>
     );
   }

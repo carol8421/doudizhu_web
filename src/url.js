@@ -6,3 +6,4 @@ export const PollChangesUrl = host+'pollchanges'
 export const GetMyCardsUrl = host+'getmycards'
 export const DealCardUrl = host+'dealcard'
 export const AskForMasterUrl = host + 'askformaster'
+export const RestartGameUrl = host+ 'restartgame';
